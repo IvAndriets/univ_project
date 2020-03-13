@@ -123,7 +123,7 @@ def projects_methods():
 
 
 @app.route('/time', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def projects_methods():
+def trekker_methods():
     if request.method == 'GET':
         get_ifo_list = [i.get_info() for i in trekker_list]
         return jsonify(get_ifo_list)
