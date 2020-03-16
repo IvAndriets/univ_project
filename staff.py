@@ -3,6 +3,7 @@ from flask import jsonify
 from flask import request
 from flask_api import status
 from uuid import uuid1
+import ast
 
 app = Flask(__name__)
 
@@ -20,26 +21,36 @@ class Person:
     def get_name(self):
         return self.name
 
+    def change_name(self, name):
+        self.name = name
+
     def get_second_name(self):
         return self.second_name
+
+    def change_second_name(self, second_name):
+        self.second_name = second_name
 
     def get_surname(self):
         return self.surname
 
+    def change_surname(self, surname):
+        self.surname = surname
+
+    def change_all_info(self, name, second_name, surname):
+        self.name = name
+        self.second_name = second_name
+        self.surname = surname
+
     def get_all_info(self):
-        return {self.id: [self.name, self.second_name, self.surname]}
+        return {'person_id': self.id, 'name': self.name, 'surname': self.surname, 'second_name': self.second_name}
 
 
-# staff_list = [
-#     Person(11111111, 'name1', 'second_name1', 'surname1'),
-#     Person(11111112, 'name2', 'second_name2', 'surname2'),
-#     Person(11111113, 'name3', 'second_name3', 'surname3'),
-#     Person(11111114, 'name4', 'second_name4', 'surname4'),
-#     Person(11111115, 'name5', 'second_name5', 'surname5'),
-#
-# ]
-staff_list = [(Person(uuid1().__str__(), "name" + str(i), 'second_name' + str(i), "surname" + str(i))) for i in
-              range(5)]
+
+staff_list = [Person("99d3de6c-66f4-11ea-8ec1-f07960024c26", "name0", 'second_name0', "surname0"),
+              Person("99d3e164-66f4-11ea-8ec1-f07960024c26", "name1", 'second_name1', "surname1"),
+              Person("99d3e1e6-66f4-11ea-8ec1-f07960024c26", "name2", 'second_name2', "surname2"),
+              Person("99d3e1e6-66f4-11ea-8ec1-f07960024c26", "name3", 'second_name3', "surname3"),
+              Person("99d3e2a4-66f4-11ea-8ec1-f07960024c26", "name4", 'second_name4', "surname4")]
 
 
 def in_person_search(surname, list_to_search):
@@ -63,18 +74,27 @@ def search_for_index(person_id, list_to_search):
     return Exception
 
 
+def validator(dict_with_persons_info):
+    if 'person_id' in dict_with_persons_info.keys():
+        return Exception
+    elif dict_with_persons_info["name"] is None:
+        return Exception
+    elif dict_with_persons_info["second_name"] is None:
+        return Exception
+    elif dict_with_persons_info["surname"] is None:
+        return Exception
+
+
 @app.route('/staff', methods=['GET', 'POST'])
-def staff_methods():
+def staff_page_methods():
     if request.method == 'GET':
         all_info = [i.get_all_info() for i in staff_list]
         return jsonify(all_info)
     elif request.method == 'POST':
-        name = 'name6'
-        second_name = 'second_name6'
-        surname = "surname6"
+        request_info = ast.literal_eval(request.data.decode('utf-8'))
         per_id = uuid1().__str__()
-        if in_person_search(surname, staff_list):
-            staff_list.append(Person(per_id, name, second_name, surname))
+        if in_person_search(request_info["surname"], staff_list):
+            staff_list.append(Person(per_id, request_info['name'], request_info['second_name'], request_info['surname']))
             all_info = [i.get_all_info() for i in staff_list]
             return jsonify(all_info)
         else:
@@ -85,7 +105,7 @@ def staff_methods():
 
 
 @app.route('/staff/<person_id>', methods=['GET', 'PUT', 'DELETE'])
-def member_page(person_id):
+def member_page_methods(person_id):
     if request.method == 'GET':
         try:
             person = in_person_search_by_id(person_id, staff_list)
@@ -94,10 +114,13 @@ def member_page(person_id):
             return jsonify(status.HTTP_404_NOT_FOUND)
     elif request.method == 'PUT':
         try:
-            person_index = search_for_index(person_id, staff_list)
-            staff_list[person_index] = Person('14bb99d4-66ba-11ea-b96a-f07960024c26', 'Alec', 'second_name0',
-                                              'Andriiets')
-            return jsonify(status.HTTP_200_OK)
+            person = in_person_search_by_id(person_id, staff_list)
+            request_info = ast.literal_eval(request.data.decode('utf-8'))
+
+            validator(request_info)
+            person.change_all_info(request_info['name'], request_info['second_name'],
+                                   request_info['surname'])
+            return jsonify(status.HTTP_200_OK, person.get_all_info())
         except:
             return jsonify(status.HTTP_404_NOT_FOUND)
     elif request.method == 'DELETE':
