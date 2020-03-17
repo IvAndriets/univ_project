@@ -4,46 +4,9 @@ from flask import request
 from flask_api import status
 from uuid import uuid1
 import ast
+from classes.person_class import *
 
 app = Flask(__name__)
-
-
-class Person:
-    def __init__(self, person_id, name, second_name, surname):
-        self.id = person_id
-        self.name = name
-        self.second_name = second_name
-        self.surname = surname
-
-    def get_id(self):
-        return self.id
-
-    def get_name(self):
-        return self.name
-
-    def change_name(self, name):
-        self.name = name
-
-    def get_second_name(self):
-        return self.second_name
-
-    def change_second_name(self, second_name):
-        self.second_name = second_name
-
-    def get_surname(self):
-        return self.surname
-
-    def change_surname(self, surname):
-        self.surname = surname
-
-    def change_all_info(self, name, second_name, surname):
-        self.name = name
-        self.second_name = second_name
-        self.surname = surname
-
-    def get_all_info(self):
-        return {'person_id': self.id, 'name': self.name, 'surname': self.surname, 'second_name': self.second_name}
-
 
 
 staff_list = [Person("99d3de6c-66f4-11ea-8ec1-f07960024c26", "name0", 'second_name0', "surname0"),
@@ -51,38 +14,6 @@ staff_list = [Person("99d3de6c-66f4-11ea-8ec1-f07960024c26", "name0", 'second_na
               Person("99d3e1e6-66f4-11ea-8ec1-f07960024c26", "name2", 'second_name2', "surname2"),
               Person("99d3e1e6-66f4-11ea-8ec1-f07960024c26", "name3", 'second_name3', "surname3"),
               Person("99d3e2a4-66f4-11ea-8ec1-f07960024c26", "name4", 'second_name4', "surname4")]
-
-
-def in_person_search(surname, list_to_search):
-    for i in list_to_search:
-        if i.get_surname() == surname:
-            return False
-    return Exception
-
-
-def in_person_search_by_id(person_id, list_to_search):
-    for i in list_to_search:
-        if i.get_id() == person_id:
-            return i
-    return Exception
-
-
-def search_for_index(person_id, list_to_search):
-    for i in range(len(list_to_search)):
-        if list_to_search[i].get_id() == person_id:
-            return i
-    return Exception
-
-
-def validator(dict_with_persons_info):
-    if 'person_id' in dict_with_persons_info.keys():
-        return Exception
-    elif dict_with_persons_info["name"] is None:
-        return Exception
-    elif dict_with_persons_info["second_name"] is None:
-        return Exception
-    elif dict_with_persons_info["surname"] is None:
-        return Exception
 
 
 @app.route('/staff', methods=['GET', 'POST'])

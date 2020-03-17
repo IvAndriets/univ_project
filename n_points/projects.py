@@ -2,36 +2,17 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_api import status
-from uuid import uuid1
+from classes.project_class import *
 
 app = Flask(__name__)
 
 
-class Project:
-    def __init__(self, project_id, project_name, project_rate):
-        self.project_id = project_id
-        self.project_name = project_name
-        self.project_rate = project_rate
-
-    def get_id(self):
-        return jsonify(self.project_id)
-
-    def get_name(self):
-        return jsonify(self.project_name)
-
-    def gat_project_rate(self):
-        return jsonify(self.project_rate)
-
-    def get_all_info(self):
-        return {self.project_id: [self.project_name, self.project_rate]}
-
-
 project_list = [
-    Project(10000001, 'P_name_1', 1),
-    Project(10000002, 'P_name_2', 2),
-    Project(10000003, 'P_name_3', 3),
-    Project(10000004, 'P_name_4', 4),
-    Project(10000005, 'P_name_5', 5),
+    Project('cfa453c4-6838-11ea-b6ff-f07960024c26', 'P_name_1', 1),
+    Project('cfa45702-6838-11ea-b6ff-f07960024c26', 'P_name_2', 2),
+    Project('cfa457a2-6838-11ea-b6ff-f07960024c26', 'P_name_3', 3),
+    Project('cfa45838-6838-11ea-b6ff-f07960024c26', 'P_name_4', 4),
+    Project('cfa458a6-6838-11ea-b6ff-f07960024c26', 'P_name_5', 5),
 ]
 
 

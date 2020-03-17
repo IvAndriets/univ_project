@@ -2,36 +2,16 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 from flask_api import status
-from uuid import uuid1
+from classes.tracker_class import *
 
 app = Flask(__name__)
 
-
-class Time:
-    def __init__(self, per_id, pro_id, time):
-        self.per_id = per_id
-        self.pro_id = pro_id
-        self.time = time
-
-    def per_id(self):
-        return jsonify(self.per_id)
-
-    def pro_id(self):
-        return jsonify(self.pro_id)
-
-    def time(self):
-        return jsonify(self.time)
-
-    def get_all_info(self):
-        return {[self.per_id, self.pro_id]: self.time}
-
-
 trekker_list = [
-    Time(10000001, 11111111, 10),
-    Time(10000001, 11111111, 10),
-    Time(10000001, 11111111, 10),
-    Time(10000001, 11111111, 10),
-    Time(10000001, 11111111, 10),
+    Time("99d3de6c-66f4-11ea-8ec1-f07960024c26", 'cfa453c4-6838-11ea-b6ff-f07960024c26', 10),
+    Time("99d3e164-66f4-11ea-8ec1-f07960024c26", 'cfa45702-6838-11ea-b6ff-f07960024c26', 10),
+    Time("99d3e1e6-66f4-11ea-8ec1-f07960024c26", 'cfa457a2-6838-11ea-b6ff-f07960024c26', 10),
+    Time("99d3e1e6-66f4-11ea-8ec1-f07960024c26", 'cfa45838-6838-11ea-b6ff-f07960024c26', 10),
+    Time("99d3e2a4-66f4-11ea-8ec1-f07960024c26", 'cfa458a6-6838-11ea-b6ff-f07960024c26', 10),
 ]
 
 
