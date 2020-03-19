@@ -14,4 +14,4 @@ class Time:
         return self.time
 
     def get_all_info(self):
-        return {[self.per_id, self.pro_id]: self.time}
+        return {"person_id": self.per_id, "project_id": self.pro_id, "hours_worked": self.time}

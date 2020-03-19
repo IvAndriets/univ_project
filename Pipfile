@@ -7,8 +7,9 @@ verify_ssl = true
 
 [packages]
 flask = "*"
+gevent = "*"
 flask-api = "*"
-flask-alchemy = "*"
+flask-sqlalchemy = "*"
 
 [requires]
 python_version = "3.7"

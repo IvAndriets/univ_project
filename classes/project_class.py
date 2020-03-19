@@ -14,4 +14,4 @@ class Project:
         return self.project_rate
 
     def get_all_info(self):
-        return {self.project_id: [self.project_name, self.project_rate]}
+        return {'project_id': self.project_id, 'project_name': self.project_name, 'project_rate': self.project_rate}
