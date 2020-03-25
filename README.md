@@ -41,12 +41,12 @@ $ pipenv run python app.py
 ```
 
 
-## Production
+## Run in production
 
-So firstly install docker from [a link](https://www.docker.com/') and then run
+Run docker compose with command below
 
 ```
 $ docker-compose -f docker-compose.yaml up
 ```
 
-and then go to [a link](http://0.0.0.0:5000/)
+and then go to given link or [a link](http://0.0.0.0:5000/)
