@@ -3,53 +3,32 @@ from flask import jsonify
 from flask import request
 from flask_api import status
 from uuid import uuid1
-import ast
+from json import loads
+from flask_sqlalchemy import SQLAlchemy
+import os
+
+posge_host = os.environ.get("POSGRESQL-HOSTNAME") or 'localhost'
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://nprl:nprl@'+posge_host+':5432/nprl'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+db = SQLAlchemy(app)
+
 from classes.person_class import *
 from classes.project_class import *
 from classes.tracker_class import *
-from gevent.pywsgi import WSGIServer
-
-app = Flask(__name__)
-
-staff_list = [Person("99d3de6c-66f4-11ea-8ec1-f07960024c26", "name0", 'second_name0', "surname0"),
-              Person("99d3e164-66f4-11ea-8ec1-f07960024c26", "name1", 'second_name1', "surname1"),
-              Person("99d3e1e6-66f4-11ea-8ec1-f07960024c26", "name2", 'second_name2', "surname2"),
-              Person("99d3e1e6-66f4-11ea-8ec1-f07960024c26", "name3", 'second_name3', "surname3"),
-              Person("99d3e2a4-66f4-11ea-8ec1-f07960024c26", "name4", 'second_name4', "surname4")]
-
-project_list = [
-    Project('cfa453c4-6838-11ea-b6ff-f07960024c26', 'P_name_1', 1),
-    Project('cfa45702-6838-11ea-b6ff-f07960024c26', 'P_name_2', 2),
-    Project('cfa457a2-6838-11ea-b6ff-f07960024c26', 'P_name_3', 3),
-    Project('cfa45838-6838-11ea-b6ff-f07960024c26', 'P_name_4', 4),
-    Project('cfa458a6-6838-11ea-b6ff-f07960024c26', 'P_name_5', 5),
-]
-
-trekker_list = [
-    Time("99d3de6c-66f4-11ea-8ec1-f07960024c26", 'cfa453c4-6838-11ea-b6ff-f07960024c26', 10),
-    Time("99d3e164-66f4-11ea-8ec1-f07960024c26", 'cfa45702-6838-11ea-b6ff-f07960024c26', 10),
-    Time("99d3e1e6-66f4-11ea-8ec1-f07960024c26", 'cfa457a2-6838-11ea-b6ff-f07960024c26', 10),
-    Time("99d3e1e6-66f4-11ea-8ec1-f07960024c26", 'cfa45838-6838-11ea-b6ff-f07960024c26', 10),
-    Time("99d3e2a4-66f4-11ea-8ec1-f07960024c26", 'cfa458a6-6838-11ea-b6ff-f07960024c26', 10),
-]
 
 
 @app.route('/staff', methods=['GET', 'POST'])
 def staff_page_methods():
     if request.method == 'GET':
-        all_info = [i.get_all_info() for i in staff_list]
-        return jsonify(all_info)
+        return jsonify([i.serialize for i in Staff.query.all()])
     elif request.method == 'POST':
-        request_info = ast.literal_eval(request.data.decode('utf-8'))
-        per_id = uuid1().__str__()
-        if in_person_search(request_info["surname"], staff_list):
-            staff_list.append(
-                Person(per_id, request_info['name'], request_info['second_name'], request_info['surname']))
-            all_info = [i.get_all_info() for i in staff_list]
-            return jsonify(all_info)
-        else:
-            replay = "This person already in list"
-            return jsonify(replay)
+        request_info = loads(request.data.decode('utf-8'))
+        person = Staff(uuid1().__str__(), request_info['name'], request_info['second_name'], request_info['surname'])
+        db.session.add(person)
+        db.session.commit()
+        return jsonify([[i.serialize for i in Staff.query.all()]])
     else:
         return status.HTTP_404_NOT_FOUND
 
@@ -58,75 +37,102 @@ def staff_page_methods():
 def member_page_methods(person_id):
     if request.method == 'GET':
         try:
-            person = in_person_search_by_id(person_id, staff_list)
-            return jsonify(person.get_all_info())
+            print(person_id)
+            person = Staff.query.get(person_id)
+            return jsonify(person.serialize)
         except:
             return jsonify(status.HTTP_404_NOT_FOUND)
     elif request.method == 'PUT':
         try:
-            person = in_person_search_by_id(person_id, staff_list)
-            request_info = ast.literal_eval(request.data.decode('utf-8'))
-
-            validator(request_info)
-            person.change_all_info(request_info['name'], request_info['second_name'],
-                                   request_info['surname'])
-            return jsonify(status.HTTP_200_OK, person.get_all_info())
-        except:
+            request_info = loads(request.data.decode('utf-8'))
+            person = Staff.query.get(person_id)
+            person.name = request_info['name']
+            person.second_name = request_info['second_name']
+            person.surname = request_info['surname']
+            db.session.commit()
+            return jsonify(status.HTTP_200_OK, person.serialize)
+        except NameError:
+            print(NameError)
             return jsonify(status.HTTP_404_NOT_FOUND)
     elif request.method == 'DELETE':
         try:
-            person_index = search_for_index(person_id, staff_list)
-            del staff_list[person_index]
+            person = Staff.query.get(person_id)
+            db.session.delete(person)
+            db.session.commit()
             return jsonify(status.HTTP_200_OK)
         except:
             return jsonify(status.HTTP_404_NOT_FOUND)
 
 
-@app.route('/projects', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/projects', methods=['GET', 'POST'])
 def projects_methods():
     if request.method == 'GET':
-        x = [i.get_all_info() for i in project_list]
-        return jsonify(x)
+        return jsonify([i.serialize for i in Project.query.all()])
     elif request.method == 'POST':
-        x = [i.get_all_info() for i in project_list]
-        return jsonify(x)
-    elif request.method == 'PUT':
-        y = [i.get_all_info() for i in project_list]
-        x = Project(10000006, 'P_name_6', 6)
-        if x.get_all_info() not in y:
-            project_list.append(x)
-        else:
-            print('Already included')
-        y = [i.get_all_info() for i in project_list]
-        return jsonify(y)
-    elif request.method == 'DELETE':
-        y = [i.get_all_info() for i in project_list]
-        x = Project(10000006, 'P_name_6', 6)
-        if x.get_all_info() in y:
-            project_list.pop()
-        else:
-            print('Already not included')
-        y = [i.get_all_info() for i in project_list]
-        return jsonify(y)
+        request_info = loads(request.data.decode('utf-8'))
+        project = Project(uuid1().__str__(), request_info['name'], request_info['rate'])
+        db.session.add(project)
+        db.session.commit()
+        return jsonify([i.serialize for i in Project.query.all()])
     else:
-        print('Error')
-        return
+        return jsonify(status.HTTP_404_NOT_FOUND)
 
 
-@app.route('/time', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/projects/<project_id>', methods=['GET', 'PUT', 'DELETE'])
+def project_paje(project_id):
+    if request.method == 'GET':
+        try:
+            project = Project.query.get(project_id)
+            return jsonify(project.serialize)
+        except:
+            jsonify(status.HTTP_404_NOT_FOUND)
+    elif request.method == 'PUT':
+        try:
+            request_info = loads(request.data.decode('utf-8'))
+            person = Project.query.get(project_id)
+            person.name = request_info['name']
+            person.rate = request_info['rate']
+            db.session.commit()
+            return jsonify(status.HTTP_200_OK, person.serialize)
+        except:
+            return jsonify(status.HTTP_404_NOT_FOUND)
+    elif request.method == 'DELETE':
+        try:
+            project = Project.query.get(project_id)
+            db.session.delete(project)
+            db.session.commit()
+            return jsonify(status.HTTP_200_OK)
+        except:
+            return jsonify(status.HTTP_404_NOT_FOUND)
+
+
+@app.route('/time', methods=['GET', 'POST', 'DELETE'])
 def trekker_methods():
     if request.method == 'GET':
-        get_ifo_list = [i.get_all_info() for i in trekker_list]
-        return jsonify(get_ifo_list)
+        return jsonify([i.serialize for i in Time.query.all()])
     elif request.method == 'POST':
-        get_ifo_list = [i.get_all_info() for i in trekker_list]
-        return jsonify(get_ifo_list)
-    elif request.method == 'PUT':
-        get_ifo_list = [i.get_all_info() for i in trekker_list]
-        return jsonify(get_ifo_list)
+        request_info = loads(request.data.decode('utf-8'))
+        project = Time(uuid1().__str__(), request_info['per_id'], request_info['pro_id'], request_info['time'])
+        db.session.add(project)
+        db.session.commit()
+        return jsonify([i.serialize for i in Time.query.all()])
+    else:
+        return jsonify(status.HTTP_404_NOT_FOUND)
+
+
+@app.route('/time/<time_id>', methods=['PUT','DELETE'])
+def time_method(time_id):
+    if request.method == 'PUT':
+        return jsonify(Time.query.get(time_id))
     elif request.method == 'DELETE':
-        get_ifo_list = [i.get_all_info() for i in trekker_list]
-        return jsonify(get_ifo_list)
+        try:
+            person = Staff.query.get(time_id)
+            db.session.delete(person)
+            db.session.commit()
+            return jsonify(status.HTTP_200_OK)
+        except:
+            return jsonify(status.HTTP_404_NOT_FOUND)
 
 
-WSGIServer(("127.0.0.1", 8080), app.wsgi_app).serve_forever()
+if __name__ == "__main__":
+    app.run()
