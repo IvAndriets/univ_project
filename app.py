@@ -10,7 +10,7 @@ import os
 posge_host = os.environ.get("POSGRESQL-HOSTNAME") or 'localhost'
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://nprl:nprl@'+posge_host+':5432/nprl'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://nprl:nprl@' + posge_host + ':5432/nprl'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 
@@ -106,6 +106,9 @@ def project_paje(project_id):
             return jsonify(status.HTTP_404_NOT_FOUND)
 
 
+
+
+
 @app.route('/time', methods=['GET', 'POST', 'DELETE'])
 def trekker_methods():
     if request.method == 'GET':
@@ -120,7 +123,7 @@ def trekker_methods():
         return jsonify(status.HTTP_404_NOT_FOUND)
 
 
-@app.route('/time/<time_id>', methods=['PUT','DELETE'])
+@app.route('/time/<time_id>', methods=['PUT', 'DELETE'])
 def time_method(time_id):
     if request.method == 'PUT':
         return jsonify(Time.query.get(time_id))
