@@ -28,8 +28,8 @@ DROP TABLE if exists nprl.public.time;
 create table nprl.public.time
 (
   id text,
-  per_id text,
-  pro_id text,
+  staff_id text,
+  project_id text,
   time text,
   crate_at timestamp not null default current_timestamp,
   primary key (id)

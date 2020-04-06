@@ -6,13 +6,17 @@ from uuid import uuid1
 from json import loads
 from flask_sqlalchemy import SQLAlchemy
 import os
+from flask_cors import CORS
 
 posge_host = os.environ.get("POSGRESQL-HOSTNAME") or 'localhost'
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://nprl:nprl@' + posge_host + ':5432/nprl'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 db = SQLAlchemy(app)
+cors = CORS(app)
 
 from classes.person_class import *
 from classes.project_class import *
@@ -28,7 +32,7 @@ def staff_page_methods():
         person = Staff(uuid1().__str__(), request_info['name'], request_info['second_name'], request_info['surname'])
         db.session.add(person)
         db.session.commit()
-        return jsonify([[i.serialize for i in Staff.query.all()]])
+        return jsonify(person.serialize)
     else:
         return status.HTTP_404_NOT_FOUND
 
@@ -37,7 +41,6 @@ def staff_page_methods():
 def member_page_methods(person_id):
     if request.method == 'GET':
         try:
-            print(person_id)
             person = Staff.query.get(person_id)
             return jsonify(person.serialize)
         except:
@@ -52,7 +55,6 @@ def member_page_methods(person_id):
             db.session.commit()
             return jsonify(status.HTTP_200_OK, person.serialize)
         except NameError:
-            print(NameError)
             return jsonify(status.HTTP_404_NOT_FOUND)
     elif request.method == 'DELETE':
         try:
@@ -104,9 +106,6 @@ def project_paje(project_id):
             return jsonify(status.HTTP_200_OK)
         except:
             return jsonify(status.HTTP_404_NOT_FOUND)
-
-
-
 
 
 @app.route('/time', methods=['GET', 'POST', 'DELETE'])

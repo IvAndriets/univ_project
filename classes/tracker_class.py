@@ -22,7 +22,7 @@ class Time(db.Model):
         return {
             'id': self.id,
             'staff_id': self.staff_id,
-            'staff_surname':self.staff_surname.surname,
+            'staff_surname': self.staff_surname.surname,
             'project_id': self.project_id,
             'project_name': self.project_name.name,
             'time': self.time
