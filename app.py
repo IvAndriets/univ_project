@@ -11,7 +11,7 @@ from flask_cors import CORS
 posge_host = os.environ.get("POSGRESQL-HOSTNAME") or 'localhost'
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://nprl:nprl@' + posge_host + ':5432/nprl'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://univ_pr:univ_pr@' + posge_host + ':5432/univ_pr'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['CORS_HEADERS'] = 'Content-Type'
 
@@ -122,9 +122,9 @@ def trekker_methods():
         return jsonify(status.HTTP_404_NOT_FOUND)
 
 
-@app.route('/time/<time_id>', methods=['PUT', 'DELETE'])
+@app.route('/time/<time_id>', methods=['GET', 'DELETE'])
 def time_method(time_id):
-    if request.method == 'PUT':
+    if request.method == 'GET':
         return jsonify(Time.query.get(time_id))
     elif request.method == 'DELETE':
         try:
