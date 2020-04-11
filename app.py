@@ -23,13 +23,35 @@ from classes.project_class import *
 from classes.tracker_class import *
 
 
+def for_staff_check(per_id):
+    list_with_time_elems = [i.serialize for i in Time.query.all()]
+    for i in list_with_time_elems:
+        if i["staff_id"] == per_id:
+            return True
+
+
+def for_projects_check(pro_id):
+    list_with_time_elems = [i.serialize for i in Time.query.all()]
+    for i in list_with_time_elems:
+        if i["project_id"] == pro_id:
+            return True
+
+
+# @app.route('/main',  methods=['GET'])
+# def main():
+#     staff = [i.serialize for i in Staff.query.all()]
+#     projects = [i.serialize for i in Project.query.all()]
+#     time_tracker = [i.serialize for i in Time.query.all()]
+
+
 @app.route('/staff', methods=['GET', 'POST'])
 def staff_page_methods():
     if request.method == 'GET':
         return jsonify([i.serialize for i in Staff.query.all()])
     elif request.method == 'POST':
         request_info = loads(request.data.decode('utf-8'))
-        person = Staff(uuid1().__str__(), request_info['name'], request_info['second_name'], request_info['surname'])
+        uuid = uuid1().__str__()
+        person = Staff(uuid, request_info['name'], request_info['second_name'], request_info['surname'])
         db.session.add(person)
         db.session.commit()
         return jsonify(person.serialize)
@@ -58,6 +80,8 @@ def member_page_methods(person_id):
             return jsonify(status.HTTP_404_NOT_FOUND)
     elif request.method == 'DELETE':
         try:
+            if for_staff_check(person_id):
+                return status.HTTP_400_BAD_REQUEST
             person = Staff.query.get(person_id)
             db.session.delete(person)
             db.session.commit()
@@ -72,16 +96,17 @@ def projects_methods():
         return jsonify([i.serialize for i in Project.query.all()])
     elif request.method == 'POST':
         request_info = loads(request.data.decode('utf-8'))
-        project = Project(uuid1().__str__(), request_info['name'], request_info['rate'])
+        uuid = uuid1().__str__()
+        project = Project(uuid, request_info['name'], request_info['rate'])
         db.session.add(project)
         db.session.commit()
-        return jsonify([i.serialize for i in Project.query.all()])
+        return jsonify(project.serialize)
     else:
         return jsonify(status.HTTP_404_NOT_FOUND)
 
 
 @app.route('/projects/<project_id>', methods=['GET', 'PUT', 'DELETE'])
-def project_paje(project_id):
+def project_page(project_id):
     if request.method == 'GET':
         try:
             project = Project.query.get(project_id)
@@ -100,6 +125,8 @@ def project_paje(project_id):
             return jsonify(status.HTTP_404_NOT_FOUND)
     elif request.method == 'DELETE':
         try:
+            if for_staff_check(project_id):
+                return status.HTTP_400_BAD_REQUEST
             project = Project.query.get(project_id)
             db.session.delete(project)
             db.session.commit()
@@ -108,28 +135,29 @@ def project_paje(project_id):
             return jsonify(status.HTTP_404_NOT_FOUND)
 
 
-@app.route('/time', methods=['GET', 'POST', 'DELETE'])
+@app.route('/time-tracker', methods=['GET', 'POST'])
 def trekker_methods():
     if request.method == 'GET':
         return jsonify([i.serialize for i in Time.query.all()])
     elif request.method == 'POST':
         request_info = loads(request.data.decode('utf-8'))
-        project = Time(uuid1().__str__(), request_info['per_id'], request_info['pro_id'], request_info['time'])
-        db.session.add(project)
+        uuid = uuid1().__str__()
+        time_track = Time(uuid, request_info['per_id'], request_info['pro_id'], request_info['time'])
+        db.session.add(time_track)
         db.session.commit()
-        return jsonify([i.serialize for i in Time.query.all()])
+        return jsonify(time_track.serialize)
     else:
         return jsonify(status.HTTP_404_NOT_FOUND)
 
 
-@app.route('/time/<time_id>', methods=['GET', 'DELETE'])
+@app.route('/time-tracker/<time_id>', methods=['GET', 'DELETE'])
 def time_method(time_id):
     if request.method == 'GET':
         return jsonify(Time.query.get(time_id))
     elif request.method == 'DELETE':
         try:
-            person = Staff.query.get(time_id)
-            db.session.delete(person)
+            time_elem = Time.query.get(time_id)
+            db.session.delete(time_elem)
             db.session.commit()
             return jsonify(status.HTTP_200_OK)
         except:
