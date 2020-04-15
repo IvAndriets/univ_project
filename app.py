@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Response
 from flask import jsonify
 from flask import request
 from flask_api import status
@@ -37,13 +37,6 @@ def for_projects_check(pro_id):
             return True
 
 
-# @app.route('/main',  methods=['GET'])
-# def main():
-#     staff = [i.serialize for i in Staff.query.all()]
-#     projects = [i.serialize for i in Project.query.all()]
-#     time_tracker = [i.serialize for i in Time.query.all()]
-
-
 @app.route('/staff', methods=['GET', 'POST'])
 def staff_page_methods():
     if request.method == 'GET':
@@ -56,7 +49,7 @@ def staff_page_methods():
         db.session.commit()
         return jsonify(person.serialize)
     else:
-        return status.HTTP_404_NOT_FOUND
+        return jsonify({'message': 'Error'}), 404
 
 
 @app.route('/staff/<person_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -66,7 +59,7 @@ def member_page_methods(person_id):
             person = Staff.query.get(person_id)
             return jsonify(person.serialize)
         except:
-            return jsonify(status.HTTP_404_NOT_FOUND)
+            return jsonify({'message': 'Not found'}), 400
     elif request.method == 'PUT':
         try:
             request_info = loads(request.data.decode('utf-8'))
@@ -75,19 +68,19 @@ def member_page_methods(person_id):
             person.second_name = request_info['second_name']
             person.surname = request_info['surname']
             db.session.commit()
-            return jsonify(status.HTTP_200_OK, person.serialize)
+            return jsonify(person.serialize)
         except NameError:
-            return jsonify(status.HTTP_404_NOT_FOUND)
+            return jsonify({'message': 'Error'}), 404
     elif request.method == 'DELETE':
         try:
             if for_staff_check(person_id):
-                return status.HTTP_400_BAD_REQUEST
+                return jsonify({'message': 'Element can`t be deleted'}), 400
             person = Staff.query.get(person_id)
             db.session.delete(person)
             db.session.commit()
-            return jsonify(status.HTTP_200_OK)
+            return jsonify({'message': 'Successfully deleted '}), 200
         except:
-            return jsonify(status.HTTP_404_NOT_FOUND)
+            return jsonify({'message': 'Error'}), 404
 
 
 @app.route('/projects', methods=['GET', 'POST'])
@@ -102,7 +95,7 @@ def projects_methods():
         db.session.commit()
         return jsonify(project.serialize)
     else:
-        return jsonify(status.HTTP_404_NOT_FOUND)
+        return jsonify({'message': 'Error'}), 404
 
 
 @app.route('/projects/<project_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -112,7 +105,7 @@ def project_page(project_id):
             project = Project.query.get(project_id)
             return jsonify(project.serialize)
         except:
-            jsonify(status.HTTP_404_NOT_FOUND)
+            return jsonify({'message': 'Error'}), 404
     elif request.method == 'PUT':
         try:
             request_info = loads(request.data.decode('utf-8'))
@@ -120,19 +113,19 @@ def project_page(project_id):
             person.name = request_info['name']
             person.rate = request_info['rate']
             db.session.commit()
-            return jsonify(status.HTTP_200_OK, person.serialize)
+            return jsonify(person.serialize)
         except:
-            return jsonify(status.HTTP_404_NOT_FOUND)
+            return jsonify({'message': 'Error'}), 404
     elif request.method == 'DELETE':
         try:
             if for_staff_check(project_id):
-                return status.HTTP_400_BAD_REQUEST
+                return jsonify({'message': 'Element can`t be deleted'}), 400
             project = Project.query.get(project_id)
             db.session.delete(project)
             db.session.commit()
-            return jsonify(status.HTTP_200_OK)
+            return jsonify({'message': 'Successfully deleted '}), 200
         except:
-            return jsonify(status.HTTP_404_NOT_FOUND)
+            return jsonify({'message': 'Error'}), 404
 
 
 @app.route('/time-tracker', methods=['GET', 'POST'])
@@ -147,7 +140,7 @@ def trekker_methods():
         db.session.commit()
         return jsonify(time_track.serialize)
     else:
-        return jsonify(status.HTTP_404_NOT_FOUND)
+        return jsonify({'message': 'Error'}), 404
 
 
 @app.route('/time-tracker/<time_id>', methods=['GET', 'DELETE'])
@@ -159,9 +152,9 @@ def time_method(time_id):
             time_elem = Time.query.get(time_id)
             db.session.delete(time_elem)
             db.session.commit()
-            return jsonify(status.HTTP_200_OK)
+            return jsonify({'message': 'Successfully deleted '}), 200
         except:
-            return jsonify(status.HTTP_404_NOT_FOUND)
+            return jsonify({'message': 'Error'}), 404
 
 
 if __name__ == "__main__":

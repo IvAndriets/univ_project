@@ -7,14 +7,9 @@ class Time(db.Model):
     id = db.Column(db.String, primary_key=True)
     staff_id = db.Column(db.String, db.ForeignKey('staff.id', onupdate="cascade", ondelete='RESTRICT'))
     staff_surname = db.relationship("Staff", backref="time_staff")
-    project_id = db.Column(db.String, db.ForeignKey('project.id',onupdate="cascade", ondelete='RESTRICT'))
+    project_id = db.Column(db.String, db.ForeignKey('project.id', onupdate="cascade", ondelete='RESTRICT'))
     project_name = db.relationship("Project", backref="time_project")
     time = db.Column(db.String)
-    # db.ForeignKeyConstraint(
-    #     [staff_id, project_id],
-    #     ['staff.id', 'project.id'],
-    #     onupdate="cascade", ondelete='RESTRICT'
-    # )
 
     def __init__(self, id, staff_id, project_id, time):
         self.id = id
