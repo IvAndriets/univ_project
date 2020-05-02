@@ -1,16 +1,15 @@
 # University project
-Шt's a project for my university.
+It's a project for my university.
 
 ### Requirements
 
-1. Docker from [a link](https://www.docker.com/)
+1. Docker v19.03 from [a link](https://www.docker.com/)
 
-2. Python3.7 from [a link](https://www.python.org/downloads/)
-
+2. Python3.7.7 from [a link](https://www.python.org/downloads/release/python-377/)
 
 ## Local Development
 
-Firstly we run data base PosgreSQL in docker compose
+Firstly we run data base PostgreSQL in docker compose
 
 ```
 $ docker-compose -f docker-compose.lock.yaml up
@@ -42,6 +41,8 @@ $ pipenv run python app.py
 
 
 ## Run in production
+
+Setup Flask and Apache to [wsgi](https://flask.palletsprojects.com/en/1.1.x/deploying/mod_wsgi/) mod 
 
 Run docker compose with command below
 
