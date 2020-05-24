@@ -1,4 +1,5 @@
 from app import db
+import datetime
 
 
 class Project(db.Model):
@@ -6,17 +7,18 @@ class Project(db.Model):
 
     id = db.Column(db.String, primary_key=True)
     name = db.Column(db.String)
-    rate = db.Column(db.String)
+    create_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     @property
     def serialize(self):
         return {
             'id': self.id,
             'name': self.name,
-            'rate': self.rate
+            'createAt': self.create_at,
+            'updateAt': self.updated_at
         }
 
-    def __init__(self, project_id, project_name, project_rate):
+    def __init__(self, project_id, project_name):
         self.id = project_id
         self.name = project_name
-        self.rate = project_rate
