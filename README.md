@@ -1,5 +1,5 @@
 # University project
-Шt's a project for my university.
+it's a project for my university.
 
 ### Requirements
 
