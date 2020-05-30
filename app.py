@@ -144,7 +144,7 @@ def project_page(project_id):
             return jsonify({'message': 'Error'}), 404
     elif request.method == 'DELETE':
         try:
-            if for_staff_check(project_id):
+            if for_projects_check(project_id):
                 return jsonify({'message': 'Element can`t be deleted'}), 400
             project = Project.query.get(project_id)
             db.session.delete(project)
@@ -376,6 +376,9 @@ def count_salary(p_s, p_e, p_id):
     table_ser = [i.serialize for i in table]
     salary = 0
     checked = vacation_salary(p_id)
+    v_t = 0
+    s_t = 0
+    h_t = 0
     for i in table_ser:
         if i['workTypeId'] == 'c9a2090e-83ad-11ea-89b5-f07960024c26':
             if not checked:
@@ -385,7 +388,13 @@ def count_salary(p_s, p_e, p_id):
         else:
             mod = int(i['workTypeMod'])
         salary += int(i['time']) * (int(i['positionSalary']) / 100 * mod)
-    return {'salary': salary, 'sheet': table_ser}
+        if i['workTypeId'] == 'c9a2090e-83ad-11ea-89b5-f07960024c26':
+            v_t += 1
+        elif i['workTypeId'] == 'c9a2090e-83ad-11ea-89b5-f07960024c26':
+            s_t += 1
+        elif i['workTypeId'] == 'c9a20990-83ad-11ea-89b5-f07960024c26':
+            h_t += 1
+    return {'salary': salary, 'vT': v_t, 'sT': s_t, 'hT': h_t}
 
 
 @app.route('/salary-table', methods=['GET', 'POST'])
@@ -430,16 +439,7 @@ def calculate():
             request_info = loads(request.data.decode('utf-8'))
             salary = count_salary(request_info['periodStart'], request_info['periodEnd'], request_info['personId'])
 
-            year = datetime.date.today().year - 1
-            date1 = datetime.datetime.strptime(('{}-1-1 00:00:00'.format(year)), '%Y-%m-%d %H:%M:%S')
-            date2 = datetime.datetime.strptime(('{}-12-31 23:59:59'.format(year)), '%Y-%m-%d %H:%M:%S')
-            table = TableSalary.query.filter_by(person_id=request_info['personId']).filter(
-                TableSalary.create_at.between(date1, date2))
-            if not table:
-                table_ser = [i.serialize for i in table]
-            else:
-                table_ser = []
-            return jsonify({'salary': salary['salary'], 'sheet': salary['sheet'], 'prev_year': table_ser})
+            return jsonify({'salary': salary['salary'], 'vT': salary['vT'], 'sT': salary['sT'], 'hT': salary['hT']})
         except NameError:
             print(NameError)
             return jsonify({'message': 'Error'}), 404

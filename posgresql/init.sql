@@ -65,7 +65,7 @@ create table univ_pr.public.work_types
 );
 
 insert into univ_pr.public.work_types(id, name, salary_mod)
-values ('c9a20896-83ad-11ea-89b5-f07960024c26', 'Standart', '100'),
+values ('c9a20896-83ad-11ea-89b5-f07960024c26', 'Standard', '100'),
        ('c9a2090e-83ad-11ea-89b5-f07960024c26', 'Vacation', '50'),
        ('c9a20990-83ad-11ea-89b5-f07960024c26', 'Hospital`s', '80');
 
